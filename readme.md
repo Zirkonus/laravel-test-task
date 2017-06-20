@@ -27,7 +27,7 @@
 ## Solution
 
 <ul><b>How to use</b>
-<li></li>
-<li></li>
-<li></li>
+<li>Download, setup DB and .env, launch composer, migrations and seeds.</li>
+<li>Then register at ZOHO, register your app and fill out config/zoho.php with correct data.</li>
+<li>Then simply go to main page.</li>
 </ul>
