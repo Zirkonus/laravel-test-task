@@ -1,33 +1,29 @@
 ## Back-End Candidate Task
 
-<ul><b>Task</b>
-<li>Create few contacts in ZohoCRM through ZohoCRM API.</li>
-<li>Data to be sent: email, first name, last name, phone number</li>
-<li>Fetch contacts from ZohoCRM and store them in MySQL/SQLite database</li>
-</ul>
+### Task
+* Create few contacts in ZohoCRM through ZohoCRM API.
+ * Data to be sent: email, first name, last name, phone number
+* Fetch contacts from ZohoCRM and store them in MySQL/SQLite database
 
-<ul><b>Requirements</b>
-<li>Register for a trial account in http://crm.zoho.com</li>
-<li>Use of Laravel 5.4</li>
-<li>Use PSR-2 codestyle rules</li>
-<li>Write at least few tests</li>
-<li>Deploy to a public GIT repository and send us the link after you are done</li>
-<li>Code has to be understandable, maintainable, reusable and extendable</li>
-<li>Third party packages can be used as well</li>
-<li>Write an explicit Readme.md file how to use your application</li>
-<li>Due to time limitation, do not try to have a perfect code, however write some comments how you would improve it to be ready for production</li>
-<li>Have some fun while coding ;)</li>
-</ul>
+### Requirements
+* Register for a trial account in http://crm.zoho.com
+* Use of Laravel 5.4
+* Use PSR-2 codestyle rules
+* Write at least few tests
+* Deploy to a public GIT repository and send us the link after you are done
+* Code has to be understandable, maintainable, reusable and extendable
+* Third party packages can be used as well
+* Write an explicit Readme.md file how to use your application
+* Due to time limitation, do not try to have a perfect code, however write some comments how you would improve it to be ready for production
+* Have some fun while coding ;)
 
-<ul><b>Resources</b>
-<li>http://crm.zoho.com</li>
-<li>https://www.zoho.com/crm/help/api/</li>
-</ul>
+### Resources
+* http://crm.zoho.com
+* https://www.zoho.com/crm/help/api/
 
 ## Solution
 
-<ul><b>How to use</b>
-<li>Download, setup DB and .env, launch composer, migrations and seeds.</li>
-<li>Then register at ZOHO, register your app and fill out config/zoho.php with correct data.</li>
-<li>Then simply go to main page.</li>
-</ul>
+### How to use
+1. Download, setup DB and .env, launch composer, migrations and seeds.
+2. Then register at ZOHO, register your app and fill out config/zoho.php with correct data.
+3. Then simply go to main page.
