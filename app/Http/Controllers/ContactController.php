@@ -33,7 +33,7 @@ class ContactController extends Controller
 
 		foreach ($u as $user) {
 			$user_from_zoho = ['First Name' => '', 'Last Name' => '', 'Email' => '', 'Phone' => ''];
-			for ($i= 0; $i<count($user['FL']); $i++) {
+			for ($i = 0; $i < count($user['FL']); $i++) {
 				if ($user['FL'][$i]['val'] == 'First Name') {
 					$user_from_zoho['First Name'] = $user['FL'][$i]['content'];
 				}
