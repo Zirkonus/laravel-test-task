@@ -2,76 +2,48 @@
 
 namespace App\Zoho;
 
+use App\Connect;
 use Psy\Exception\ErrorException;
 
 class ZohoConnect
 {
-	protected $link = "https://accounts.zoho.com/apiauthtoken/nb/create?SCOPE=ZohoCRM/crmapi";
-	protected $email;
+	protected $email = 'nzzo0510@gmail.com';
 	protected $app;
 	protected $code;
 	protected $token;
 
-	public function __construct()
+	public function __construct($app)
 	{
-		$this->email	= \Config::get('zoho.email');
-		$this->token	= \Config::get('zoho.authtoken');
-		$this->app		= \Config::get('zoho.app');
-		$this->code		= \Config::get('zoho.auth_code');
+		$this->app = $app;
+		$this->getDate();
 
 		if (!$this->token) {
-			$this->token = $this->getToken();
+			$this->getToken();
 		}
-	}
-
-	public function getToken()
-	{
-		$url 	= "https://accounts.zoho.com/apiauthtoken/nb/create";
-		$param 	= 'SCOPE=ZohoCRM/crmapi&EMAIL_ID=' . $this->email . '&PASSWORD=' . $this->code . '&DISPLAY_NAME=' . $this->app;
-
-		dd($url.$param);
-		https://accounts.zoho.com/apiauthtoken/nb/createSCOPE=ZohoCRM/crmapi&EMAIL_ID=nzzo@rambler.ru&PASSWORD=aqEuW3r019Y5&DISPLAY_NAME=zohoapi2
-		$result = $this->zohoCurl($url, $param);
-
-		if (preg_match('/FALSE/', $result)) {
-			throw new ErrorException('Wrong Connection');
-		}
-
-		if (preg_match('/RESULT=TRUE/', $result)) {
-			$pattern = '/AUTHTOKEN=(\w)*/';
-			$res = preg_match($pattern, $result, $matches);
-			$str = substr($matches[0], 10);
-			\Config::set('zoho.authtoken', $str);
-		} else {
-			throw new ErrorException('Wrong Connection');
-		}
-
-		return $str;
 	}
 
 	public function getUsers()
 	{
-		$url = "https://crm.zoho.com/crm/private/json/Contacts/getRecords";
-		$param = 'newFormat=1&authtoken=' . $this->token . '&scope=crmapi&sortColumnString=Account Name&sortOrderString=desc';
+		$url    = "https://crm.zoho.com/crm/private/json/Contacts/getRecords";
+		$param  = 'newFormat=1&authtoken=' . $this->token . '&scope=crmapi&sortColumnString=Account Name&sortOrderString=desc';
 
-		return $this->zohoCurl($url, $param);
+		return $this->getJson($this->zohoCurl($url, $param));
 	}
 
 	public function insertUser($user)
 	{
-		$start_line	='<Contacts><row no="1">';
-		$first_name	= "<FL val=\"First Name\">$user->first_name</FL>";
-		$last_name	= "<FL val=\"Last Name\">$user->last_name</FL>";
+		$startLine	='<Contacts><row no="1">';
+		$firstName	= "<FL val=\"First Name\">$user->first_name</FL>";
+		$lastName	= "<FL val=\"Last Name\">$user->last_name</FL>";
 		$email		= "<FL val=\"Email\">$user->email</FL>";
 		$phone		= "<FL val=\"Phone\">$user->phone</FL>";
-		$end_line	="</row></Contacts>";
+		$endLine	="</row></Contacts>";
 
-		$xml_link = $start_line.$first_name.$last_name.$email.$phone.$end_line;
+		$xmlLink    = $startLine . $firstName . $lastName . $email . $phone . $endLine;
+		$url        = 'https://crm.zoho.com/crm/private/xml/Contacts/insertRecords';
+		$param      = 'authtoken=' . $this->token . '&scope=crmapi&newFormat=1&xmlData='.$xmlLink;
 
-		$url = 'https://crm.zoho.com/crm/private/xml/Contacts/insertRecords';
-		$param = 'authtoken=' . $this->token . '&scope=crmapi&newFormat=1&xmlData='.$xml_link;
-
-		return $this->zohoCurl($url, $param);
+		$this->getJson($this->zohoCurl($url, $param));
 	}
 
 	protected function zohoCurl($url, $param)
@@ -89,7 +61,63 @@ class ZohoConnect
 		if (!$result) {
 			throw new ErrorException('some problems with connecting');
 		}
-
 		return $result;
+	}
+
+	protected function getDate()
+	{
+		if (!$this->app) {
+			throw new ErrorException("Wrong app name or it's empty!" );
+		}
+
+		$date = Connect::where('app', $this->app)->first();
+		if (!$date) {
+			throw new ErrorException("Wrong App name");
+		}
+
+		$this->code     = $date->code;
+		$this->token    = $date->token;
+	}
+
+	protected function getToken()
+	{
+		$url 	= "https://accounts.zoho.com/apiauthtoken/nb/create";
+		$param 	= 'SCOPE=ZohoCRM/crmapi&EMAIL_ID=' . $this->email . '&PASSWORD=' . $this->code . '&DISPLAY_NAME=' . $this->app;
+
+		$result = $this->zohoCurl($url, $param);
+
+		if (preg_match('/FALSE/', $result)) {
+			throw new ErrorException('Wrong Connection');
+		}
+
+		if (preg_match('/RESULT=TRUE/', $result)) {
+			$pattern = '/AUTHTOKEN=(\w)*/';
+
+			preg_match($pattern, $result, $matches);
+
+			$this->token = substr($matches[0], 10);
+		} else {
+			throw new ErrorException('Wrong Connection');
+		}
+	}
+
+	protected function getJson($result)
+	{
+		if (preg_match('/\?xml/', $result)) {
+			if (!preg_match('/success/', $result)) {
+				return 'Error for operation';
+			}
+			return "Operation success!";
+		} else {
+			if (!preg_match('/result/', $result)) {
+				return "Error for get data";
+			}
+
+			$res = json_decode($result, true);
+			if (!$res) {
+				throw new ErrorException("Wrong unswer!");
+			}
+			return $res;
+		}
 	}
 }

@@ -10,7 +10,10 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
-    Route::get('/', 'ContactController@showContacts')->name('show_users');
-    Route::get('/add', 'ContactController@addUser');
-    Route::post('/add', 'ContactController@addUserTo');
-    Route::get('/add/{id}', 'ContactController@addUserById');
+Route::get('/', function(){
+	return view('welcome');
+});
+    Route::get('/{app}', 'ContactController@showContacts')->name('show_users');
+    Route::get('/{app}/add', 'ContactController@addUser');
+    Route::post('/{app}/add', 'ContactController@addUserTo');
+    Route::get('/{app}/add/{id}', 'ContactController@addUserById');

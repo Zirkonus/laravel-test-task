@@ -10,46 +10,17 @@ use Psy\Exception\ErrorException;
 
 class ContactController extends Controller
 {
-	public function showContacts()
+	public function showContacts($app)
 	{
-		$connect_users = $this->getContacts();
+		$connectUsers = $this->getContacts($app);
+		//$connectUsers = '';
 		$contacts = Contacts::all();
-		return view('contacts', ['contacts' => $contacts , 'connect_users' => $connect_users]);
-	}
 
-	public function getContacts()
-	{
-		$connect = new ZohoConnect();
-
-		if (!$connect) {
-			throw new ErrorException('wrong data');
-		}
-
-		$users = json_decode($connect->getUsers(), true);
-
-		$u = $users['response']['result']['Contacts']['row'] ;
-
-		$users_from_zoho = [];
-
-		foreach ($u as $user) {
-			$user_from_zoho = ['First Name' => '', 'Last Name' => '', 'Email' => '', 'Phone' => ''];
-			for ($i = 0; $i < count($user['FL']); $i++) {
-				if ($user['FL'][$i]['val'] == 'First Name') {
-					$user_from_zoho['First Name'] = $user['FL'][$i]['content'];
-				}
-				if ($user['FL'][$i]['val'] == 'Last Name') {
-					$user_from_zoho['Last Name'] = $user['FL'][$i]['content'];
-				}
-				if ($user['FL'][$i]['val'] == 'Email') {
-					$user_from_zoho['Email'] = $user['FL'][$i]['content'];
-				}
-				if $user['FL'][$i]['val'] == 'Phone') {
-					$user_from_zoho['Phone'] = $user['FL'][$i]['content'];
-				}
-			}
-			$users_from_zoho[] = $user_from_zoho;
-		}
-	   return $users_from_zoho;
+		return view('contacts', [
+			'contacts'      => $contacts,
+			'connect_users' => $connectUsers,
+			'app'           => $app
+		]);
 	}
 
 	public function addUser()
@@ -57,7 +28,7 @@ class ContactController extends Controller
 		return view('form');
 	}
 
-	public function addUserTo(Request $request)
+	public function addUserTo(Request $request, $app)
 	{
 		$this->validate($request, [
 			'first_name'	=> 'required',
@@ -72,12 +43,10 @@ class ContactController extends Controller
 		$contact->last_name 	= $request->input('last_name');
 		$contact->phone 		= $request->input('phone');
 		$contact->email 		= $request->input('email');
-
 		$contact->save();
 
-		$connect = new ZohoConnect() ;
-
-		$result = $connect->insertUser($contact);
+		$connect    = new ZohoConnect($app);
+		$result     = $connect->insertUser($contact);
 
 		if (!$result) {
 			throw new ErrorException('User not added');
@@ -86,7 +55,7 @@ class ContactController extends Controller
 		return redirect()->route('show_users')->with('Success added');
 	}
 
-	public function addUserById($id)
+	public function addUserById($id, $app)
 	{
 		$user = Contacts::find($id);
 
@@ -94,8 +63,8 @@ class ContactController extends Controller
 			throw new ErrorException('Error');
 		}
 
-		$connect = new ZohoConnect() ;
-		$result = $connect->insertUser($user);
+		$connect    = new ZohoConnect($app);
+		$result     = $connect->insertUser($user);
 
 		if (!$result) {
 			throw new ErrorException('User not added');
@@ -103,5 +72,43 @@ class ContactController extends Controller
 
 		return redirect()->route('show_users');
 	}
-}
 
+	protected function getContacts($app)
+	{
+		$connect = new ZohoConnect($app);
+
+		if (!$connect) {
+			throw new ErrorException('wrong data');
+		}
+
+		$users          = $connect->getUsers();
+
+		if (!$users) {
+			throw new ErrorException('Wrong data');
+		}
+
+		$usersFromZoho  = [];
+		$u              = $users['response']['result']['Contacts']['row'] ;
+
+		foreach ($u as $user) {
+			$userZoho = ['First Name' => '', 'Last Name' => '', 'Email' => '', 'Phone' => ''];
+			for ($i = 0; $i < count($user['FL']); $i++) {
+				if ($user['FL'][$i]['val'] == 'First Name') {
+					$userZoho['First Name'] = $user['FL'][$i]['content'];
+				}
+				if ($user['FL'][$i]['val'] == 'Last Name') {
+					$userZoho['Last Name'] = $user['FL'][$i]['content'];
+				}
+				if ($user['FL'][$i]['val'] == 'Email') {
+					$userZoho['Email'] = $user['FL'][$i]['content'];
+				}
+				if ($user['FL'][$i]['val'] == 'Phone') {
+					$userZoho['Phone'] = $user['FL'][$i]['content'];
+				}
+			}
+			$usersFromZoho[] = $userZoho;
+		}
+		return $usersFromZoho;
+	}
+
+}

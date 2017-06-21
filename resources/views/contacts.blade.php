@@ -15,7 +15,7 @@
 		<div class="container">
 			<div class="row">
 				<div class="flex-center position-ref full-height">
-					<div><a href="/add" class="btn btn-success">New User</a></div>
+					<div><a href="/{{$app}}/add" class="btn btn-success">New User</a></div>
 					<div>
 						<h4> Our contact in DB</h4>
 					</div>
