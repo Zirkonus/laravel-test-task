@@ -2,7 +2,7 @@
 
 ### Task
 * Create few contacts in ZohoCRM through ZohoCRM API.
- * Data to be sent: email, first name, last name, phone number
+  * Data to be sent: email, first name, last name, phone number
 * Fetch contacts from ZohoCRM and store them in MySQL/SQLite database
 
 ### Requirements
