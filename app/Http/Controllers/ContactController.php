@@ -13,7 +13,6 @@ class ContactController extends Controller
 	public function showContacts($app)
 	{
 		$connectUsers = $this->getContacts($app);
-		//$connectUsers = '';
 		$contacts = Contacts::all();
 
 		return view('contacts', [
@@ -81,7 +80,7 @@ class ContactController extends Controller
 			throw new ErrorException('wrong data');
 		}
 
-		$users          = $connect->getUsers();
+		$users = $connect->getUsers();
 
 		if (!$users) {
 			throw new ErrorException('Wrong data');
@@ -92,6 +91,7 @@ class ContactController extends Controller
 
 		foreach ($u as $user) {
 			$userZoho = ['First Name' => '', 'Last Name' => '', 'Email' => '', 'Phone' => ''];
+
 			for ($i = 0; $i < count($user['FL']); $i++) {
 				if ($user['FL'][$i]['val'] == 'First Name') {
 					$userZoho['First Name'] = $user['FL'][$i]['content'];
@@ -108,7 +108,7 @@ class ContactController extends Controller
 			}
 			$usersFromZoho[] = $userZoho;
 		}
+
 		return $usersFromZoho;
 	}
-
 }

@@ -11,6 +11,7 @@ class ZohoConnect
 	protected $app;
 	protected $code;
 	protected $token;
+	protected $count = 0;
 
 	public function __construct($app)
 	{
@@ -61,6 +62,7 @@ class ZohoConnect
 		if (!$result) {
 			throw new ErrorException('some problems with connecting');
 		}
+
 		return $result;
 	}
 
@@ -77,6 +79,8 @@ class ZohoConnect
 
 		$this->code     = $date->code;
 		$this->token    = $date->token;
+
+		return true;
 	}
 
 	protected function getToken()
@@ -92,10 +96,9 @@ class ZohoConnect
 
 		if (preg_match('/RESULT=TRUE/', $result)) {
 			$pattern = '/AUTHTOKEN=(\w)*/';
-
 			preg_match($pattern, $result, $matches);
-
 			$this->token = substr($matches[0], 10);
+			Connect::where('app', $this->app)->update(['token' => $this->token]);
 		} else {
 			throw new ErrorException('Wrong Connection');
 		}
@@ -103,21 +106,29 @@ class ZohoConnect
 
 	protected function getJson($result)
 	{
+		if (preg_match('/Error/', $result)) {
+			if ($this->count == 0) {
+				$this->count += 1;
+				$this->getToken();
+			} else {
+				return 'Check you settings for getting token';
+			}
+		}
 		if (preg_match('/\?xml/', $result)) {
 			if (!preg_match('/success/', $result)) {
 				return 'Error for operation';
 			}
-			return "Operation success!";
-		} else {
-			if (!preg_match('/result/', $result)) {
-				return "Error for get data";
-			}
 
-			$res = json_decode($result, true);
-			if (!$res) {
-				throw new ErrorException("Wrong unswer!");
-			}
-			return $res;
+			return "Operation success!";
 		}
+		if (!preg_match('/result/', $result)) {
+				return "Error for get data";
+		}
+		$res = json_decode($result, true);
+		if (!$res) {
+			throw new ErrorException("Wrong unswer!");
+		}
+
+		return $res;
 	}
 }
